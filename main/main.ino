@@ -12,18 +12,20 @@ struct Person {
   Button button;
 };
 
-Button yellowButton = {"Yellow", A0};
-Button greenButton = {"Green", A1};
-Button redButton = {"Red", A2};
-Button blueButton = {"Blue", A3};
+Button yellowButton = { "Yellow", A0 };
+Button greenButton = { "Green", A1 };
+Button redButton = { "Red", A2 };
+Button blueButton = { "Blue", A3 };
 Button buttons[] = { yellowButton, greenButton, redButton, blueButton };
 
 // Initializing persons
-Person trang = {"Trang", yellowButton};
-Person minh = {"Minh", greenButton};
-Person anh = {"Anh", redButton};
+Person trang = { "Trang", yellowButton };
+Person minh = { "Minh", greenButton };
+Person anh = { "Anh", redButton };
 
-Person roommates[] = { trang, minh, anh};
+// Using pointers to Person objects
+Person* roommates[] = { &trang, &minh, &anh };
+int roommateNo = sizeof(roommates) / sizeof(roommates[0]);
 int currentPerson = 0;
 
 //the right motor will be controlled by the motor A pins on the motor driver
@@ -65,7 +67,9 @@ void setup() {
 
 /********************************************************************************/
 void loop() {
-  buttonCheck();
+  if (buttonCheck()) {
+    lcd.clear();
+  }
   displayOnLcd();
   if (Serial.available() > 0)  //if the user has sent a command to the RedBoard
   {
@@ -84,8 +88,8 @@ void loop() {
 }
 
 void displayOnLcd() {
-  lcd.setCursor(0, 0);                             //set the cursor to the 0,0 position (top left corner)
-  lcd.print("Next turn:" + roommates[currentPerson].name);  //print hello, world! starting at that position
+  lcd.setCursor(0, 0);                                      //set the cursor to the 0,0 position (top left corner)
+  lcd.print("Next turn:" + roommates[currentPerson]->name);  //print hello, world! starting at that position
   lcd.setCursor(0, 1);
   lcd.print("T.   M.   A.");
 }
@@ -130,12 +134,43 @@ void leftMotor(int motorSpeed)  //function for driving the left motor
 
 /********************************************************************************/
 //CHECK WHICH BUTTON IS PRESSED
-void buttonCheck() {
-  //check if any buttons are being pressed
-  //set all of the button pins to input_pullup (use the built-in pull-up resistors)
-  for (int i = 0; i < 4; i++) {
-    if (digitalRead(buttons[i].pin) == LOW) {
-      Serial.println("button " + String(buttons[i].name) + " is pressed!");
-    }
+bool buttonCheck() {
+  // Check if any buttons are being pressed
+  // Set all of the button pins to input_pullup (use the built-in pull-up resistors)
+  if (digitalRead(yellowButton.pin) == LOW) {
+    checkButtonPressed(trang);
+    return true;
+  } else if (digitalRead(greenButton.pin) == LOW) {
+    checkButtonPressed(minh);
+    return true;
+  } else if (digitalRead(redButton.pin) == LOW) {
+    checkButtonPressed(anh);
+    return true;
+  } else if (digitalRead(blueButton.pin) == LOW) {
+    Serial.println("blue");
+    return true;
   }
+  return false;
+}
+
+void checkButtonPressed(Person& person) {
+  if (comparePersonsByReference(roommates[currentPerson], &person)) {
+    nextPerson();
+  } else {
+    Serial.println("WRONG");
+  }
+}
+
+void nextPerson(){
+  Serial.println("Succeedd");
+  if (currentPerson == roommateNo - 1) {
+    currentPerson = 0;
+  } else {
+    currentPerson += 1;
+  }
+  Serial.println("Change Person!!!");
+}
+
+bool comparePersonsByReference(Person* p1, Person* p2) {
+  return (p1 == p2);
 }
