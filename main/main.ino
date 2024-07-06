@@ -42,6 +42,7 @@ const int driveTime = 20;  //this is the number of milliseconds that it takes th
                            //it is set so that if you tell the robot to drive forward 25 units, the robot drives about 25 inches
 
 String distance;  //the distance to travel in each direction
+const int DISTANCE_DISPENSE_ONE_BAG = 500;
 
 /********************************************************************************/
 void setup() {
@@ -71,20 +72,6 @@ void loop() {
     lcd.clear();
   }
   displayOnLcd();
-  if (Serial.available() > 0)  //if the user has sent a command to the RedBoard
-  {
-    distance = Serial.readStringUntil(' ');  //read the characters in the command until you reach the second space
-
-    //print the command that was just received in the serial monitor
-    Serial.print(" ");
-    Serial.println(distance.toInt());
-
-    rightMotor(-200);                     //drive the right wheel forward
-    leftMotor(-200);                      //drive the left wheel forward
-    delay(driveTime * distance.toInt());  //drive the motors long enough travel the entered distance
-    rightMotor(0);                        //turn the right motor off
-    leftMotor(0);                         //turn the left motor off
-  }
 }
 
 void displayOnLcd() {
@@ -99,44 +86,6 @@ void displayOnLcd(String customized) {
   lcd.print(customized);
   lcd.setCursor(0, 1);
   lcd.print("T.   M.   A.");
-}
-
-/********************************************************************************/
-void rightMotor(int motorSpeed)  //function for driving the right motor
-{
-  if (motorSpeed > 0)  //if the motor should drive forward (positive speed)
-  {
-    digitalWrite(AIN1, HIGH);  //set pin 1 to high
-    digitalWrite(AIN2, LOW);   //set pin 2 to low
-  } else if (motorSpeed < 0)   //if the motor should drive backward (negative speed)
-  {
-    digitalWrite(AIN1, LOW);   //set pin 1 to low
-    digitalWrite(AIN2, HIGH);  //set pin 2 to high
-  } else                       //if the motor should stop
-  {
-    digitalWrite(AIN1, LOW);  //set pin 1 to low
-    digitalWrite(AIN2, LOW);  //set pin 2 to low
-  }
-  analogWrite(PWMA, abs(motorSpeed));  //now that the motor direction is set, drive it at the entered speed
-}
-
-/********************************************************************************/
-void leftMotor(int motorSpeed)  //function for driving the left motor
-{
-  if (motorSpeed > 0)  //if the motor should drive forward (positive speed)
-  {
-    digitalWrite(BIN1, HIGH);  //set pin 1 to high
-    digitalWrite(BIN2, LOW);   //set pin 2 to low
-  } else if (motorSpeed < 0)   //if the motor should drive backward (negative speed)
-  {
-    digitalWrite(BIN1, LOW);   //set pin 1 to low
-    digitalWrite(BIN2, HIGH);  //set pin 2 to high
-  } else                       //if the motor should stop
-  {
-    digitalWrite(BIN1, LOW);  //set pin 1 to low
-    digitalWrite(BIN2, LOW);  //set pin 2 to low
-  }
-  analogWrite(PWMB, abs(motorSpeed));  //now that the motor direction is set, drive it at the entered speed
 }
 
 /********************************************************************************/
@@ -158,11 +107,63 @@ bool buttonCheck() {
     return true;
   } else if (digitalRead(blueButton.pin) == LOW) {
     Serial.println("blue");
+    bagIsDispensed();
+    dispenseBag();
+    while (digitalRead(blueButton.pin) == LOW ) {}
     return true;
   }
   return false;
 }
+/********************************************************************************/
+// DISPENSE TRASH BAGS
+void bagIsDispensed(){
+  displayOnLcd("Bag is cominggg!");
+}
 
+void dispenseBag() {
+    rightMotor(-200);                     //drive the right wheel forward
+    leftMotor(-200);                      //drive the left wheel forward
+    delay(driveTime * DISTANCE_DISPENSE_ONE_BAG);  //drive the motors long enough travel the entered distance
+    rightMotor(0);                        //turn the right motor off
+    leftMotor(0);                         //turn the left motor off
+}
+void rightMotor(int motorSpeed)  //function for driving the right motor
+{
+  if (motorSpeed > 0)  //if the motor should drive forward (positive speed)
+  {
+    digitalWrite(AIN1, HIGH);  //set pin 1 to high
+    digitalWrite(AIN2, LOW);   //set pin 2 to low
+  } else if (motorSpeed < 0)   //if the motor should drive backward (negative speed)
+  {
+    digitalWrite(AIN1, LOW);   //set pin 1 to low
+    digitalWrite(AIN2, HIGH);  //set pin 2 to high
+  } else                       //if the motor should stop
+  {
+    digitalWrite(AIN1, LOW);  //set pin 1 to low
+    digitalWrite(AIN2, LOW);  //set pin 2 to low
+  }
+  analogWrite(PWMA, abs(motorSpeed));  //now that the motor direction is set, drive it at the entered speed
+}
+
+void leftMotor(int motorSpeed)  //function for driving the left motor
+{
+  if (motorSpeed > 0)  //if the motor should drive forward (positive speed)
+  {
+    digitalWrite(BIN1, HIGH);  //set pin 1 to high
+    digitalWrite(BIN2, LOW);   //set pin 2 to low
+  } else if (motorSpeed < 0)   //if the motor should drive backward (negative speed)
+  {
+    digitalWrite(BIN1, LOW);   //set pin 1 to low
+    digitalWrite(BIN2, HIGH);  //set pin 2 to high
+  } else                       //if the motor should stop
+  {
+    digitalWrite(BIN1, LOW);  //set pin 1 to low
+    digitalWrite(BIN2, LOW);  //set pin 2 to low
+  }
+  analogWrite(PWMB, abs(motorSpeed));  //now that the motor direction is set, drive it at the entered speed
+}
+/********************************************************************************/
+// CHECK PERSON
 void checkButtonPressed(Person& person) {
   if (comparePersonsByReference(roommates[currentPerson], &person)) {
     nextPerson();
