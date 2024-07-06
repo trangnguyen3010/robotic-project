@@ -7,11 +7,24 @@ struct Button {
   int pin;
 };
 
+struct Person {
+  String name;
+  Button button;
+};
+
 Button yellowButton = {"Yellow", A0};
 Button greenButton = {"Green", A1};
 Button redButton = {"Red", A2};
 Button blueButton = {"Blue", A3};
 Button buttons[] = { yellowButton, greenButton, redButton, blueButton };
+
+// Initializing persons
+Person trang = {"Trang", yellowButton};
+Person minh = {"Minh", greenButton};
+Person anh = {"Anh", redButton};
+
+Person roommates[] = { trang, minh, anh};
+int currentPerson = 0;
 
 //the right motor will be controlled by the motor A pins on the motor driver
 const int AIN1 = 13;  //control pin 1 on the motor driver for the right motor
@@ -27,9 +40,6 @@ const int driveTime = 20;  //this is the number of milliseconds that it takes th
                            //it is set so that if you tell the robot to drive forward 25 units, the robot drives about 25 inches
 
 String distance;  //the distance to travel in each direction
-
-String names[] = { "trang", "minh", "anh" };
-int currentPerson = 0;
 
 /********************************************************************************/
 void setup() {
@@ -75,7 +85,9 @@ void loop() {
 
 void displayOnLcd() {
   lcd.setCursor(0, 0);                             //set the cursor to the 0,0 position (top left corner)
-  lcd.print("Next turn:" + names[currentPerson]);  //print hello, world! starting at that position
+  lcd.print("Next turn:" + roommates[currentPerson].name);  //print hello, world! starting at that position
+  lcd.setCursor(0, 1);
+  lcd.print("T.   M.   A.");
 }
 
 /********************************************************************************/
