@@ -40,8 +40,6 @@ const int BIN1 = 8;   //control pin 1 on the motor driver for the left motor
 
 const int driveTime = 20;  //this is the number of milliseconds that it takes the robot to drive 1 inch
                            //it is set so that if you tell the robot to drive forward 25 units, the robot drives about 25 inches
-
-String distance;  //the distance to travel in each direction
 const int DISTANCE_DISPENSE_ONE_BAG = 500;
 
 /********************************************************************************/
