@@ -94,6 +94,13 @@ void displayOnLcd() {
   lcd.print("T.   M.   A.");
 }
 
+void displayOnLcd(String customized) {
+  lcd.setCursor(0, 0);                                      //set the cursor to the 0,0 position (top left corner)
+  lcd.print(customized);
+  lcd.setCursor(0, 1);
+  lcd.print("T.   M.   A.");
+}
+
 /********************************************************************************/
 void rightMotor(int motorSpeed)  //function for driving the right motor
 {
@@ -139,12 +146,15 @@ bool buttonCheck() {
   // Set all of the button pins to input_pullup (use the built-in pull-up resistors)
   if (digitalRead(yellowButton.pin) == LOW) {
     checkButtonPressed(trang);
+    while (digitalRead(yellowButton.pin) == LOW ) {}
     return true;
   } else if (digitalRead(greenButton.pin) == LOW) {
     checkButtonPressed(minh);
+    while (digitalRead(greenButton.pin) == LOW ) {}
     return true;
   } else if (digitalRead(redButton.pin) == LOW) {
     checkButtonPressed(anh);
+    while (digitalRead(redButton.pin) == LOW ) {}
     return true;
   } else if (digitalRead(blueButton.pin) == LOW) {
     Serial.println("blue");
@@ -157,18 +167,25 @@ void checkButtonPressed(Person& person) {
   if (comparePersonsByReference(roommates[currentPerson], &person)) {
     nextPerson();
   } else {
-    Serial.println("WRONG");
+    wrongPerson();
   }
 }
 
 void nextPerson(){
-  Serial.println("Succeedd");
+  displayOnLcd("Good job, love!");
+  delay(200);
   if (currentPerson == roommateNo - 1) {
     currentPerson = 0;
   } else {
     currentPerson += 1;
   }
   Serial.println("Change Person!!!");
+}
+
+void wrongPerson() {
+  displayOnLcd("Wrong personnn!");
+  delay(200);
+  Serial.println("WRONG");
 }
 
 bool comparePersonsByReference(Person* p1, Person* p2) {
