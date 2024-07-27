@@ -12,6 +12,11 @@ struct Person {
   Button button;
 };
 
+const int trigPin = A4;           //connects to the trigger pin on the distance sensor
+const int echoPin = A5;           //connects to the echo pin on the distance sensor
+float distance = 0;               //stores the distance measured by the distance sensor
+
+/********************************************************************************/
 Button yellowButton = { "Yellow", A0 };
 Button greenButton = { "Green", A1 };
 Button redButton = { "Red", A2 };
@@ -40,7 +45,7 @@ const int BIN1 = 8;   //control pin 1 on the motor driver for the left motor
 
 const int driveTime = 20;  //this is the number of milliseconds that it takes the robot to drive 1 inch
                            //it is set so that if you tell the robot to drive forward 25 units, the robot drives about 25 inches
-const int DISTANCE_DISPENSE_ONE_BAG = 500;
+const int DISTANCE_DISPENSE_ONE_BAG = 300;
 
 /********************************************************************************/
 void setup() {
@@ -48,6 +53,9 @@ void setup() {
   for (int i = 0; i < 4; i++) {
     pinMode(buttons[i].pin, INPUT_PULLUP);
   }
+
+  pinMode(trigPin, OUTPUT);   //the trigger pin will output pulses of electricity
+  pinMode(echoPin, INPUT);    //the echo pin will measure the duration of pulses coming back from the distance sensor
 
   lcd.begin(16, 2);  //tell the lcd library that we are using a display that is 16 characters wide and 2 characters high
   lcd.clear();
@@ -70,6 +78,18 @@ void loop() {
     lcd.clear();
   }
   displayOnLcd();
+
+  distance = getDistance();   //variable to store the distance measured by the sensor
+  Serial.print(distance);     //print the distance that was measured
+  Serial.println(" in");      //print units after the distance
+
+  if (distance < 2) {
+    bagIsDispensed();
+    dispenseBag();
+    delay(200);
+  }
+
+  delay(50);
 }
 
 void displayOnLcd() {
@@ -189,4 +209,24 @@ void wrongPerson() {
 
 bool comparePersonsByReference(Person* p1, Person* p2) {
   return (p1 == p2);
+}
+
+/********************************************************************************/
+//RETURNS THE DISTANCE MEASURED BY THE HC-SR04 DISTANCE SENSOR
+float getDistance()
+{
+  float echoTime;                   //variable to store the time it takes for a ping to bounce off an object
+  float calculatedDistance;         //variable to store the distance calculated from the echo time
+
+  //send out an ultrasonic pulse that's 10ms long
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  echoTime = pulseIn(echoPin, HIGH);      //use the pulsein command to see how long it takes for the
+                                          //pulse to bounce back to the sensor
+
+  calculatedDistance = echoTime / 148.0;  //calculate the distance of the object that reflected the pulse (half the bounce time multiplied by the speed of sound)
+  
+  return calculatedDistance;              //send back the distance that was calculated
 }
